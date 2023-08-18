@@ -1,9 +1,13 @@
 import 'package:AirTours/services/cloud/cloud_booking.dart';
 import 'package:AirTours/services/cloud/cloud_flight.dart';
 import 'package:AirTours/views/Manage_booking/tickets_view.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../services/cloud/firestore_booking.dart';
+import '../../services/cloud/firestore_flight.dart';
+import '../Global/global_var.dart';
 
 class OneWayDetails extends StatefulWidget {
   final CloudBooking booking;
@@ -23,6 +27,7 @@ class _OneWayDetailsState extends State<OneWayDetails> {
   late final BookingFirestore _bookingService;
   late final CloudFlight departFlight;
   late final CloudBooking currentBooking;
+  late final FlightFirestore _flightsService;
 
   @override
   void initState() {
@@ -30,6 +35,19 @@ class _OneWayDetailsState extends State<OneWayDetails> {
     _bookingService = BookingFirestore();
     departFlight = widget.depFlight;
     currentBooking = widget.booking;
+    _flightsService = FlightFirestore();
+  }
+
+  String date1(Timestamp date) {
+    DateTime departureDate = date.toDate();
+    DateFormat formatter = DateFormat('MM dd yyyy');
+    String formattedDate = formatter.format(departureDate);
+    List<String> parts = formattedDate.split(' ');
+    int month = int.parse(parts[0]);
+    String monthName = monthNames[month];
+    String day = parts[1];
+    String year = parts[2];
+    return '$monthName $day $year';
   }
 
   @override
@@ -42,72 +60,118 @@ class _OneWayDetailsState extends State<OneWayDetails> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           GestureDetector(
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => TicketsView(
-                        booking: widget.booking, flight: widget.depFlight),
-                  ));
-            },
-            child: Container(
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Colors.blue,
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Destination Flight',
-                    style: TextStyle(
-                      fontSize: 24.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 12.0),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.flight_takeoff,
-                        color: Colors.white,
-                      ),
-                      const SizedBox(width: 8.0),
-                      Text(
-                        widget.depFlight.fromCity,
-                        style: const TextStyle(
-                          fontSize: 18.0,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8.0),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.flight_land,
-                        color: Colors.white,
-                      ),
-                      const SizedBox(width: 8.0),
-                      Text(
-                        widget.depFlight.toCity,
-                        style: const TextStyle(
-                          fontSize: 18.0,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TicketsView(
+                          booking: widget.booking, flight: widget.depFlight),
+                    ));
+              },
+              child: Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                      boxShadow: const [
+                        BoxShadow(blurRadius: 2, offset: Offset(0, 0))
+                      ],
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white),
+                  child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Destination Flight",
+                                style: TextStyle(fontSize: 22),
+                              ),
+                              Text(
+                                date1(departFlight.depDate),
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            height: 1.0,
+                            color: Colors.black,
+                            width: double.infinity,
+                            //child: SizedBox.expand(),
+                          ),
+                          Column(children: [
+                            Row(
+                              children: [
+                                Text(
+                                  widget.depFlight.fromCity,
+                                  style: TextStyle(fontSize: 19),
+                                ),
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                Container(
+                                  height: 20,
+                                  child: Image.asset('images/flight-Icon.png'),
+                                ),
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                Text(
+                                  widget.depFlight.toCity,
+                                  style: TextStyle(fontSize: 19),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                          _flightsService
+                                              .formatTime(departFlight.depTime),
+                                        ),
+                                        SizedBox(
+                                          width: 10,
+                                        ),
+                                        SizedBox(
+                                          width: 20,
+                                          child: Text("-"),
+                                        ),
+                                        Text(
+                                          _flightsService
+                                              .formatTime(departFlight.arrTime),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                            "Price: ${widget.booking.bookingPrice}")
+                                      ],
+                                    )
+                                  ],
+                                )
+                              ],
+                            )
+                          ]),
+                        ],
+                      )))),
           const SizedBox(height: 16.0),
           Expanded(
             child: Container(
+              width: double.infinity,
               color: Colors.white,
               padding: const EdgeInsets.all(16.0),
               child: Column(

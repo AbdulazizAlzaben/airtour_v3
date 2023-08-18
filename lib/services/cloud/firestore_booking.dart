@@ -2,7 +2,7 @@ import 'package:AirTours/constants/flight_constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:AirTours/services/cloud/cloud_booking.dart';
 import 'package:AirTours/constants/booking_constants.dart';
-import '../../constants/ticket_constants';
+import '../../constants/ticket_constants.dart';
 
 class BookingFirestore {
   final bookings = FirebaseFirestore.instance.collection('bookings');

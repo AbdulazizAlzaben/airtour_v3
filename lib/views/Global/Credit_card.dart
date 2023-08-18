@@ -230,8 +230,21 @@ class _CreditcardState extends State<Creditcard> {
                                 border: InputBorder.none,
                               ),
                               validator: (value) {
+                                int month = int.parse(value!.substring(0, 2));
+                                int year = int.parse(value.substring(3, 5));
+                                print(month);
+                                print(year);
                                 if (value!.isEmpty) {
                                   return "Enter a Expiry Date";
+                                }
+                                if (month > 12 && year < 23) {
+                                  return "Enter Expiry Date correctly";
+                                }
+                                if (month > 12) {
+                                  return "Enter month Date correctly";
+                                }
+                                if (year < 23) {
+                                  return "Enter year Date correctly";
                                 }
                                 return null;
                               },

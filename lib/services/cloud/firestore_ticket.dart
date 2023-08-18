@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:AirTours/services/cloud/cloud_ticket.dart';
-import 'package:AirTours/constants/ticket_constants';
+import 'package:AirTours/constants/ticket_constants.dart';
 
 import '../../constants/flight_constants.dart';
 

@@ -1,11 +1,14 @@
 import 'package:AirTours/views/Manage_booking/one_way_details.dart';
 import 'package:AirTours/views/Manage_booking/round_trip_details.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../services/cloud/cloud_booking.dart';
 import '../../services/cloud/cloud_flight.dart';
 import '../../services/cloud/firestore_booking.dart';
 import '../../services/cloud/firestore_flight.dart';
+import '../Global/global_var.dart';
 
 class ViewBookings extends StatefulWidget {
   const ViewBookings({super.key});
@@ -53,6 +56,23 @@ class _ViewBookingsState extends State<ViewBookings> {
         MaterialPageRoute(
             builder: (context) => RoundTripDetails(
                 booking: booking, depFlight: depFlight, retFlight: retFlight)));
+  }
+
+  // String date1(Timestamp date) {
+  //   DateTime departureDate = date.toDate();
+  //   DateFormat formatter = DateFormat('${monthNames["MM"]} dd yyyy');
+  //   return formatter.format(departureDate);
+  // }
+  String date1(Timestamp date) {
+    DateTime departureDate = date.toDate();
+    DateFormat formatter = DateFormat('MM dd yyyy');
+    String formattedDate = formatter.format(departureDate);
+    List<String> parts = formattedDate.split(' ');
+    int month = int.parse(parts[0]);
+    String monthName = monthNames[month];
+    String day = parts[1];
+    String year = parts[2];
+    return '$monthName $day $year';
   }
 
   @override
@@ -121,13 +141,18 @@ class _ViewBookingsState extends State<ViewBookings> {
                                     );
                                   }
                                 },
-                                child: Card(
-                                  elevation: 4.0,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                  ),
+                                child: Container(
+                                  //width: double.infinity,
+                                  margin: const EdgeInsets.all(5),
+                                  decoration: BoxDecoration(
+                                      boxShadow: const [
+                                        BoxShadow(
+                                            blurRadius: 2, offset: Offset(0, 0))
+                                      ],
+                                      borderRadius: BorderRadius.circular(20),
+                                      color: Colors.white),
                                   child: Padding(
-                                    padding: const EdgeInsets.all(16.0),
+                                    padding: const EdgeInsets.all(20.0),
                                     child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
@@ -137,60 +162,137 @@ class _ViewBookingsState extends State<ViewBookings> {
                                               MainAxisAlignment.spaceBetween,
                                           children: [
                                             Text(
-                                              '\$${booking.bookingPrice}',
-                                              style: const TextStyle(
-                                                fontSize: 24.0,
+                                              date1(departureFlight.depDate),
+                                              style: TextStyle(
+                                                fontSize: 17,
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
-                                            const Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.end,
-                                              children: [
-                                                SizedBox(height: 4.0),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 16.0),
-                                        Row(
-                                          children: [
-                                            Icon(Icons.flight_takeoff,
-                                                color: Colors.grey[600]),
-                                            const SizedBox(width: 8.0),
-                                            Text(
-                                              "${departureFlight.fromCity} to ${departureFlight.toCity}",
-                                              style: const TextStyle(
-                                                fontSize: 20.0,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 8.0),
-                                        Row(
-                                          children: [
-                                            Icon(Icons.flight_land,
-                                                color: Colors.grey[600]),
-                                            const SizedBox(width: 8.0),
-                                            if (booking.returnFlight == 'none')
-                                              const Text(
-                                                "",
-                                                style: TextStyle(
-                                                  fontSize: 20.0,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
                                             if (booking.returnFlight != 'none')
                                               Text(
-                                                "${returnFlight!.fromCity} to ${returnFlight!.toCity}",
-                                                style: const TextStyle(
-                                                  fontSize: 20.0,
+                                                date1(returnFlight!.depDate),
+                                                style: TextStyle(
+                                                  fontSize: 17,
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
                                           ],
                                         ),
+                                        Text(
+                                          "Referance:",
+                                          style: TextStyle(fontSize: 24),
+                                        ),
+                                        Text(booking.documentId),
+                                        SizedBox(
+                                          child: Divider(
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Column(children: [
+                                              Row(
+                                                children: [
+                                                  Text(
+                                                    departureFlight.fromCity,
+                                                    style:
+                                                        TextStyle(fontSize: 19),
+                                                  ),
+                                                  SizedBox(
+                                                    width: 5,
+                                                  ),
+                                                  Container(
+                                                    height: 20,
+                                                    child: Image.asset(
+                                                        'images/flight-Icon.png'),
+                                                  ),
+                                                  SizedBox(
+                                                    width: 5,
+                                                  ),
+                                                  Text(
+                                                    departureFlight.toCity,
+                                                    style:
+                                                        TextStyle(fontSize: 19),
+                                                  ),
+                                                ],
+                                              ),
+                                              Row(
+                                                children: [
+                                                  Text(
+                                                    _flightsService.formatTime(
+                                                        departureFlight
+                                                            .depTime),
+                                                  ),
+                                                  SizedBox(
+                                                    width: 10,
+                                                  ),
+                                                  SizedBox(
+                                                    width: 20,
+                                                    child: Text("-"),
+                                                  ),
+                                                  Text(
+                                                    _flightsService.formatTime(
+                                                        departureFlight
+                                                            .arrTime),
+                                                  ),
+                                                ],
+                                              )
+                                            ]),
+                                            if (booking.returnFlight != 'none')
+                                              Column(children: [
+                                                Row(
+                                                  children: [
+                                                    Text(
+                                                      returnFlight!.fromCity,
+                                                      style: TextStyle(
+                                                          fontSize: 19),
+                                                    ),
+                                                    SizedBox(
+                                                      width: 5,
+                                                    ),
+                                                    Container(
+                                                      height: 20,
+                                                      child: Image.asset(
+                                                          'images/flight-Icon.png'),
+                                                    ),
+                                                    SizedBox(
+                                                      width: 5,
+                                                    ),
+                                                    Text(
+                                                      returnFlight!.toCity,
+                                                      style: TextStyle(
+                                                          fontSize: 19),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    Text(
+                                                      _flightsService
+                                                          .formatTime(
+                                                              returnFlight!
+                                                                  .depTime),
+                                                    ),
+                                                    SizedBox(
+                                                      width: 10,
+                                                    ),
+                                                    SizedBox(
+                                                      width: 20,
+                                                      child: Text("-"),
+                                                    ),
+                                                    Text(
+                                                      _flightsService
+                                                          .formatTime(
+                                                              returnFlight!
+                                                                  .arrTime),
+                                                    ),
+                                                  ],
+                                                )
+                                              ]),
+                                          ],
+                                        )
                                       ],
                                     ),
                                   ),
