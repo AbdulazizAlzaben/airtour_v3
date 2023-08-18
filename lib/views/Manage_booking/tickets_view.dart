@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 
 import '../../services/cloud/firestore_flight.dart';
 import '../Global/global_var.dart';
+import 'boarding_pass.dart';
 //import 'e-boarding_pass.dart';
 
 class TicketsView extends StatefulWidget {
@@ -25,6 +26,7 @@ class TicketsView extends StatefulWidget {
 }
 
 class _TicketsViewState extends State<TicketsView> {
+  //late final CloudTicket ticket12;
   late final TicketFirestore _ticketsService;
   late final String bookingId;
   late final String flightId;
@@ -103,6 +105,7 @@ class _TicketsViewState extends State<TicketsView> {
                 itemCount: allTickets.length,
                 itemBuilder: (context, index) {
                   final ticket = allTickets.elementAt(index);
+                  final selectedTicket = ticket;
                   return Container(
                     width: double.infinity,
                     margin: const EdgeInsets.all(5),
@@ -383,15 +386,18 @@ class _TicketsViewState extends State<TicketsView> {
                         ),
                         GestureDetector(
                           onTap: () async {
+                            int selectedIndex = index;
                             if (ticket.checkInStatus) {
                               // Navigator.push(
-                              //     context,
-                              //     MaterialPageRoute(
-                              //       builder: (context) => BoardingPass(
-                              //           booking: widget.booking,
-                              //           flight: widget.flight,
-                              //           ticket1: ticket),
-                              //     ));
+                              //   context,
+                              //   MaterialPageRoute(
+                              //     builder: (context) => BoardingPass(
+                              //       booking: widget.booking,
+                              //       flight: widget.flight,
+                              //       ticket: allTickets.elementAt(selectedIndex), // Use the selectedTicket variable
+                              //     ),
+                              //   ),
+                              // );
                             } else {
                               final bool isChecked = await _ticketsService
                                   .checkInUpdating(ticket.documentId, flightId);

@@ -59,9 +59,16 @@ class _OneWaySearchState extends State<OneWaySearch> {
     DateTime arrivalDateTime = arrivalTime.toDate();
 
     Duration travelDuration = arrivalDateTime.difference(departureDateTime);
+    print("-------------");
+
+    print("departureDateTime:$departureDateTime");
+    print("-------------");
+    print("arrivalDateTime:$arrivalDateTime");
+    print("-------------");
 
     int totalMinutes = travelDuration.inMinutes;
-    int hours = totalMinutes ~/ 60;
+    int hours = travelDuration.inHours;
+    //int hours = totalMinutes ~/ 60;
     int minutes = totalMinutes % 60;
 
     // String formattedTravelTime = hours.toString() + 'h';
